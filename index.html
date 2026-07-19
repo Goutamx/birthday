@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For You ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100vh;
+            height: -webkit-fill-available;
+            overflow: hidden;
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            z-index: 99999;
+            opacity: 1;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+
+        #overlay.hide {
+            opacity: 0;
+        }
+
+        #particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            padding: 30px 24px;
+            overflow: hidden;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            background: linear-gradient(135deg, rgba(255, 153, 204, 0.2), rgba(255, 153, 204, 0.08));
+            border: 1px solid rgba(255, 153, 204, 0.3);
+            border-radius: 50px;
+            color: #ff99cc;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(255, 153, 204, 0.35), rgba(255, 153, 204, 0.15));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 153, 204, 0.12);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes slideOutLeft {
+            from { opacity: 1; transform: translateX(0) rotate(0deg); }
+            to { opacity: 0; transform: translateX(-120%) rotate(-8deg); }
+        }
+
+        @keyframes slideOutRight {
+            from { opacity: 1; transform: translateX(0) rotate(0deg); }
+            to { opacity: 0; transform: translateX(120%) rotate(8deg); }
+        }
+
+        @keyframes slideInFromRight {
+            from { opacity: 0; transform: translateX(80px) rotate(4deg); }
+            to { opacity: 1; transform: translateX(0) rotate(0deg); }
+        }
+
+        @keyframes slideInFromLeft {
+            from { opacity: 0; transform: translateX(-80px) rotate(-4deg); }
+            to { opacity: 1; transform: translateX(0) rotate(0deg); }
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.1em;
+            background: #ff99cc;
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* SCREEN 1 — LANDING */
+        #screen-landing {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .landing-photo {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.15;
+            filter: blur(2px);
+            z-index: 0;
+        }
+
+        .landing-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .landing-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: #ffffff;
+            opacity: 0;
+            text-shadow: 0 0 60px rgba(255, 153, 204, 0.25);
+        }
+
+        .landing-sub {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+            opacity: 0;
+            max-width: 320px;
+            line-height: 1.6;
+        }
+
+        .landing-btn {
+            margin-top: 40px;
+            opacity: 0;
+        }
+
+        /* SCREEN 2 — MESSAGE */
+        #screen-message {
+            text-align: center;
+        }
+
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            max-width: 500px;
+        }
+
+        .msg-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 2;
+            text-align: center;
+            min-height: 200px;
+        }
+
+        .message-btn {
+            margin-top: 40px;
+            opacity: 0;
+        }
+
+
+.bday-restart-btn {
+    margin-top: 30px;
+    opacity: 0;
+    font-size: 0.8rem;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, rgba(255, 153, 204, 0.1), rgba(255, 153, 204, 0.05));
+    border: 1px solid rgba(255, 153, 204, 0.2);
+}
+
+.bday-restart-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 153, 204, 0.25), rgba(255, 153, 204, 0.1));
+}
+
+
+        /* SCREEN 3 — PHOTOS */
+        #screen-photos {
+            padding: 20px;
+        }
+
+        .photos-header {
+            text-align: center;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease 0.3s forwards;
+        }
+
+        .photos-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
+        }
+
+        .photos-header p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.35);
+            line-height: 1.5;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .photo-viewer {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.6s forwards;
+        }
+
+        .photo-stage {
+            position: relative;
+            width: 260px;
+            height: 320px;
+            margin-top: 15px;
+        }
+
+        .photo-frame {
+            position: absolute;
+            top: 0; left: 0;
+            width: 260px;
+            height: 320px;
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 12px 12px 45px 12px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            will-change: transform, opacity;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2px;
+            display: block;
+            pointer-events: none;
+        }
+
+        .photo-frame .photo-num {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-size: 0.65rem;
+            color: rgba(0, 0, 0, 0.2);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .photo-caption-text {
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-style: italic;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+
+        .photo-tap-hint {
+            margin-top: 16px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 1px;
+            animation: gentlePulse 2.5s ease-in-out infinite;
+        }
+
+        .photos-end {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 20px;
+            opacity: 0;
+            max-width: 400px;
+        }
+
+        .photos-end.show {
+            display: flex;
+            animation: fadeInUp 1.5s ease forwards;
+        }
+
+        .photos-end p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        /* SCREEN 4 — QUIZ */
+        #screen-quiz {
+            padding: 30px 24px;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.3s forwards;
+        }
+
+        .quiz-header h2 {
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .quiz-header p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.5;
+        }
+
+        .quiz-progress {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .quiz-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff99cc, #ffb3d9);
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .quiz-body {
+            width: 100%;
+            min-height: 300px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .quiz-card {
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        .quiz-card.active {
+            opacity: 1;
+            position: relative;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .quiz-question {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .quiz-opt {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .quiz-opt:hover {
+            background: rgba(255, 153, 204, 0.08);
+            border-color: rgba(255, 153, 204, 0.25);
+        }
+
+        .quiz-opt:active {
+            transform: scale(0.98);
+        }
+
+        .quiz-opt.selected {
+            background: rgba(255, 153, 204, 0.12);
+            border-color: rgba(255, 153, 204, 0.4);
+            color: #ffffff;
+        }
+
+        .quiz-opt.dimmed {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .quiz-reaction {
+            margin-top: 18px;
+            font-size: 0.9rem;
+            color: #ff99cc;
+            opacity: 0;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .quiz-reaction.show {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .quiz-ending {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0;
+            opacity: 0;
+            max-width: 450px;
+        }
+
+        .quiz-ending.show {
+            display: flex;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .quiz-end-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 2;
+            min-height: 120px;
+        }
+
+        /* SCREEN 5 — AUDIO */
+        #screen-audio {
+            padding: 20px 20px;
+        }
+
+        .audio-player-container {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.3s forwards;
+        }
+
+        .audio-player-title {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .audio-player-title h2 {
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .audio-player-title p {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.35);
+            line-height: 1.5;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .audio-card-player {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .audio-cover-wrapper {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            position: relative;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .audio-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.5s ease;
+        }
+
+        .audio-cover-overlay {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            pointer-events: none;
+        }
+
+        .audio-track-number {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+            letter-spacing: 2px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .audio-info {
+            padding: 16px 18px 18px;
+        }
+
+        .audio-track-title {
+            font-size: 0.95rem;
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .audio-progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .audio-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #ff99cc;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        .audio-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 16px;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .audio-ctrl-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .audio-ctrl-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: rgba(255, 255, 255, 0.6);
+            transition: fill 0.2s ease;
+        }
+
+        .audio-ctrl-btn:hover svg {
+            fill: #ffffff;
+        }
+
+        .audio-ctrl-btn:active {
+            transform: scale(0.9);
+        }
+
+        .audio-play-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 153, 204, 0.2);
+            border: 1px solid rgba(255, 153, 204, 0.3);
+        }
+
+        .audio-play-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #ff99cc;
+        }
+
+        .audio-play-btn:hover {
+            background: rgba(255, 153, 204, 0.35);
+        }
+
+        .audio-dots {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .audio-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .audio-dot.active {
+            background: #ff99cc;
+            width: 18px;
+            border-radius: 3px;
+        }
+
+        .audio-end {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 16px;
+            opacity: 0;
+            max-width: 320px;
+            min-height: 180px;
+        }
+
+        .audio-end.show {
+            display: flex;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .audio-end-text {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        /* SCREEN 6 — BIRTHDAY */
+        #screen-birthday {
+            background: #000000;
+        }
+
+        .birthday-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            z-index: 2;
+            position: relative;
+            max-width: 500px;
+        }
+
+        .bday-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: #ffffff;
+            opacity: 0;
+            text-shadow: 0 0 80px rgba(255, 153, 204, 0.3);
+            line-height: 1.4;
+        }
+
+        .bday-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 2;
+            opacity: 0;
+            min-height: 100px;
+        }
+
+        .bday-last {
+            font-size: 1.05rem;
+            color: #ff99cc;
+            opacity: 0;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .landing-title { font-size: 3.2rem; }
+            .photo-stage { width: 300px; height: 370px; }
+            .photo-frame { width: 300px; height: 370px; }
+            .bday-main { font-size: 3.5rem; }
+            .quiz-question { font-size: 1.4rem; }
+            .audio-card-player { max-width: 400px; }
+        }
+
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+
+    <div id="overlay"></div>
+    <canvas id="particles"></canvas>
+
+    <!-- SCREEN 1 — LANDING -->
+    <div class="screen active" id="screen-landing">
+        <img src="images/landing.png" alt="" class="landing-photo">
+        <div class="landing-content">
+            <h1 class="landing-title" id="landing-title">Happy Birthday, Bhena.</h1>
+            <p class="landing-sub" id="landing-sub">Just something fun in the middle of all this. Maybe it makes you smile.</p>
+            <button class="btn landing-btn" id="landing-btn">Next →</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2 — MESSAGE -->
+    <div class="screen" id="screen-message">
+        <div class="message-container">
+            <div class="msg-text" id="msg-text"></div>
+            <button class="btn message-btn" id="message-btn">Begin →</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3 — PHOTOS -->
+    <div class="screen" id="screen-photos">
+        <div class="photos-header">
+            <h2>I saved these for today.</h2>
+            <p>Some are funny. Some are old. Some you don't even know I had. All of them are you.</p>
+        </div>
+        <div class="photo-viewer" id="photo-viewer">
+            <div class="photo-stage" id="photo-stage"></div>
+            <p class="photo-caption-text" id="photo-caption"></p>
+            <p class="photo-tap-hint">tap the photo</p>
+        </div>
+        <div class="photos-end" id="photos-end">
+            <p id="photos-end-text"></p>
+            <button class="btn" id="photos-next-btn">Next →</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4 — QUIZ -->
+    <div class="screen" id="screen-quiz">
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header" id="quiz-header">
+                <h2>A Small Quiz.</h2>
+                <p>Just something fun in the middle of all this. Maybe it makes you smile.</p>
+            </div>
+            <div class="quiz-progress">
+                <div class="quiz-progress-bar" id="quiz-bar"></div>
+            </div>
+            <div class="quiz-body" id="quiz-body"></div>
+        </div>
+        <div class="quiz-ending" id="quiz-ending">
+            <div class="quiz-end-text" id="quiz-end-text"></div>
+            <button class="btn" id="quiz-next-btn" style="margin-top:30px; opacity:0;">Continue →</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 5 — AUDIO -->
+    <div class="screen" id="screen-audio">
+        <div class="audio-player-container" id="audio-player-container">
+            <div class="audio-player-title">
+                <h2>A few things you said.</h2>
+                <p>Some funny, some random, some you probably forgot you even said. I kept all of them.</p>
+            </div>
+            <div class="audio-card-player" id="audio-card-player">
+                <div class="audio-cover-wrapper">
+                    <img src="images/cover1.jpg" alt="" class="audio-cover-img" id="audio-cover">
+                    <div class="audio-cover-overlay"></div>
+                    <span class="audio-track-number" id="audio-track-num">01 / 07</span>
+                </div>
+                <div class="audio-info">
+                    <p class="audio-track-title" id="audio-title">The Laugh™</p>
+                    <div class="audio-progress-bar" id="audio-progress-bar">
+                        <div class="audio-progress-fill" id="audio-progress-fill"></div>
+                    </div>
+                    <div class="audio-time">
+                        <span id="audio-current">0:00</span>
+                        <span id="audio-duration">0:00</span>
+                    </div>
+                    <div class="audio-controls">
+                        <button class="audio-ctrl-btn" id="audio-prev">
+                            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                        </button>
+                        <button class="audio-ctrl-btn audio-play-btn" id="audio-play">
+                            <svg viewBox="0 0 24 24" id="audio-play-icon"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button class="audio-ctrl-btn" id="audio-next">
+                            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="audio-dots" id="audio-dots"></div>
+        </div>
+        <div class="audio-end" id="audio-end">
+            <p class="audio-end-text">That was all of them.</p>
+            <button class="btn" id="audio-final-btn">Next →</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 6 — BIRTHDAY -->
+<div class="screen" id="screen-birthday">
+    <div class="birthday-content">
+        <h1 class="bday-main" id="bday-main">Happy Birthday, Bhena.</h1>
+        <div class="bday-text" id="bday-text"></div>
+        <p class="bday-last" id="bday-last">Stay exactly this real.</p>
+        <button class="btn bday-restart-btn" id="bday-restart-btn">View Again ↻</button>
+    </div>
+</div>
+
+    <script>
+        // ===========================
+        // TYPING ANIMATION ENGINE
+        // ===========================
+        function typeText(element, text, speed = 30, callback = null) {
+            element.innerHTML = '';
+            let i = 0;
+            const cursor = document.createElement('span');
+            cursor.classList.add('typing-cursor');
+
+            function type() {
+                if (i < text.length) {
+                    if (text[i] === '\n') {
+                        element.appendChild(document.createElement('br'));
+                    } else {
+                        element.appendChild(document.createTextNode(text[i]));
+                    }
+                    if (element.contains(cursor)) element.removeChild(cursor);
+                    element.appendChild(cursor);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    setTimeout(() => {
+                        if (element.contains(cursor)) {
+                            cursor.style.animation = 'fadeIn 0.5s ease reverse forwards';
+                            setTimeout(() => {
+                                if (element.contains(cursor)) element.removeChild(cursor);
+                            }, 500);
+                        }
+                        if (callback) callback();
+                    }, 800);
+                }
+            }
+            type();
+        }
+
+        // ===========================
+        // UTILITIES
+        // ===========================
+        function switchScreen(from, to, delay = 0) {
+            setTimeout(() => {
+                document.getElementById(from).classList.remove('active');
+                document.getElementById(to).classList.add('active');
+            }, delay);
+        }
+
+        // ===========================
+        // PARTICLE SYSTEM
+        // ===========================
+        class Particles {
+            constructor(canvas) {
+                this.c = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.p = [];
+                this.id = null;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+            resize() {
+                this.c.width = window.innerWidth;
+                this.c.height = window.innerHeight;
+            }
+            create(n = 50) {
+                this.p = [];
+                for (let i = 0; i < n; i++) {
+                    this.p.push({
+                        x: Math.random() * this.c.width,
+                        y: Math.random() * this.c.height,
+                        vx: (Math.random() - 0.5) * 0.3,
+                        vy: (Math.random() - 0.5) * 0.3 - 0.1,
+                        r: Math.random() * 2 + 0.5,
+                        o: Math.random() * 0.3 + 0.05,
+                        os: Math.random() * 0.004 + 0.002,
+                        od: 1,
+                        l: Math.random() * 1000,
+                        color: Math.random() > 0.7 ? 'ff99cc' : 'ffffff'
+                    });
+                }
+            }
+            draw() {
+                this.ctx.clearRect(0, 0, this.c.width, this.c.height);
+                this.p.forEach(p => {
+                    p.x += p.vx + Math.sin(p.l * 0.01) * 0.12;
+                    p.y += p.vy;
+                    p.l++;
+                    p.o += p.os * p.od;
+                    if (p.o >= 0.4) p.od = -1;
+                    if (p.o <= 0.02) p.od = 1;
+                    if (p.x < -5) p.x = this.c.width + 5;
+                    if (p.x > this.c.width + 5) p.x = -5;
+                    if (p.y < -5) p.y = this.c.height + 5;
+                    if (p.y > this.c.height + 5) p.y = -5;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(${parseInt(p.color.substr(0,2),16)}, ${parseInt(p.color.substr(2,2),16)}, ${parseInt(p.color.substr(4,2),16)}, ${p.o.toFixed(3)})`;
+                    this.ctx.fill();
+                });
+                this.id = requestAnimationFrame(() => this.draw());
+            }
+            start(n = 50) {
+                this.stop();
+                this.create(n);
+                this.draw();
+            }
+            stop() {
+                if (this.id) cancelAnimationFrame(this.id);
+                this.ctx.clearRect(0, 0, this.c.width, this.c.height);
+            }
+        }
+
+        const particles = new Particles(document.getElementById('particles'));
+        particles.start(50);
+
+        // ===========================
+        // GLOBAL FADE IN
+        // ===========================
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('overlay').classList.add('hide');
+            }, 300);
+        });
+
+        // ===========================
+        // ALL TEXT CONTENT
+        // ===========================
+        const TEXTS = {
+            message: "I had another plan for your birthday. A better one, at least in my head. But things got delayed, time got shorter, and I reached that point where I had to choose between making nothing or making this. And making this felt right. Because even if it is simple, even if it repeats something I did before, it still carries the one thing I wanted it to carry — me. My time, my effort, my memories, my way of saying happy birthday without saying it like everyone else does. So if this feels familiar, that's okay. Some things are worth repeating when the person matters enough. And you do.",
+
+            photosEnd: "That was not everything. Just the parts I chose to keep here. The rest lives in conversations, in memories, and in the kind of moments that don't always get photographed but never really leave either.",
+
+            quizEnd: "You really do make things unforgettable without even trying. The chaos, the confidence, the little handmade things, the way your personality somehow ends up in everything — that is very you. And I think that is why even the smallest moments with you stay longer than they should. So before this gets too serious, here are a few voices and moments I saved too.",
+
+            birthdayText: "If I had to say everything simply, I would say this: I am glad you were born, glad I know you, and glad life made you my sister. I hope 18 brings you more smiles than stress, more good surprises than bad days, and more moments that feel like home. You deserve to be celebrated properly, not just today, but always.",
+        };
+
+        // ===========================
+        // SCREEN 1 — LANDING
+        // ===========================
+        (function initLanding() {
+            const title = document.getElementById('landing-title');
+            const sub = document.getElementById('landing-sub');
+            const btn = document.getElementById('landing-btn');
+
+            setTimeout(() => { title.style.animation = 'fadeIn 2s ease forwards'; }, 800);
+            setTimeout(() => { sub.style.animation = 'fadeInUp 1.5s ease forwards'; }, 2500);
+            setTimeout(() => { btn.style.animation = 'fadeInUp 1s ease forwards'; }, 4000);
+
+            btn.addEventListener('click', () => {
+                switchScreen('screen-landing', 'screen-message');
+                initMessage();
+            });
+        })();
+
+        // ===========================
+        // SCREEN 2 — MESSAGE
+        // ===========================
+        function initMessage() {
+            const msgText = document.getElementById('msg-text');
+            const btn = document.getElementById('message-btn');
+
+            setTimeout(() => {
+                typeText(msgText, TEXTS.message, 28, () => {
+                    setTimeout(() => {
+                        btn.style.animation = 'fadeInUp 1s ease forwards';
+                    }, 500);
+                });
+            }, 600);
+
+            btn.addEventListener('click', () => {
+                switchScreen('screen-message', 'screen-photos');
+                initPhotoSection();
+            });
+        }
+
+        // ===========================
+        // SCREEN 3 — PHOTOS
+        // ===========================
+        const photoData = [
+            { src: 'images/photo1.jpg', caption: "You look even prettier when you're making faces." },
+            { src: 'images/photo2.png', caption: "This is the face of someone about to fight the camera." },
+            { src: 'images/photo3.jpg', caption: "Little you. Still very much you." },
+            { src: 'images/photo4.jpg', caption: "You were a pari then. Still are, just louder." },
+            { src: 'images/photo5.jpg', caption: "The color is bright. So are you. Always have been." },
+            { src: 'images/photo6.jpg', caption: "A small thing that meant more than you knew." },
+            { src: 'images/photo7.png', caption: "Smaller than the ones in shops. More beautiful than all of them." },
+            { src: 'images/photo8.jpg', caption: "Only you could make a haircut story this dramatic." },
+            { src: 'images/photo9.jpg', caption: "The first one. Still the most special." },
+            { src: 'images/photo10.jpg', caption: "Homemade, handmade, and completely awesome. Best Rakhi ever." },
+            { src: 'images/photo11.jpg', caption: "Every year you tie this and every year it means more." },
+        ];
+
+        let photoIndex = 0;
+        let photoAnimating = false;
+
+        function initPhotoSection() {
+            const stage = document.getElementById('photo-stage');
+            const caption = document.getElementById('photo-caption');
+
+            photoData.forEach(p => {
+                const img = new Image();
+                img.src = p.src;
+            });
+
+            createPhotoFrame(stage, 0);
+            caption.textContent = photoData[0].caption;
+            caption.style.opacity = '1';
+
+            stage.addEventListener('click', handlePhotoTap);
+        }
+
+        function createPhotoFrame(stage, index) {
+            const frame = document.createElement('div');
+            frame.classList.add('photo-frame');
+            frame.id = 'current-photo';
+
+            const img = document.createElement('img');
+            img.src = photoData[index].src;
+            img.alt = '';
+
+            const num = document.createElement('span');
+            num.classList.add('photo-num');
+            num.textContent = `${index + 1} / ${photoData.length}`;
+
+            frame.appendChild(img);
+            frame.appendChild(num);
+            stage.appendChild(frame);
+
+            return frame;
+        }
+
+        function handlePhotoTap() {
+            if (photoAnimating) return;
+            photoAnimating = true;
+
+            const stage = document.getElementById('photo-stage');
+            const caption = document.getElementById('photo-caption');
+            const currentFrame = document.getElementById('current-photo');
+            const viewer = document.getElementById('photo-viewer');
+            const end = document.getElementById('photos-end');
+
+            const direction = photoIndex % 2 === 0 ? 'left' : 'right';
+
+            if (direction === 'left') {
+                currentFrame.style.animation = 'slideOutLeft 0.5s ease forwards';
+            } else {
+                currentFrame.style.animation = 'slideOutRight 0.5s ease forwards';
+            }
+
+            caption.style.transition = 'opacity 0.3s ease';
+            caption.style.opacity = '0';
+
+            photoIndex++;
+
+            if (photoIndex < photoData.length) {
+                setTimeout(() => {
+                    if (stage.contains(currentFrame)) {
+                        stage.removeChild(currentFrame);
+                    }
+
+                    const newFrame = createPhotoFrame(stage, photoIndex);
+
+                    if (direction === 'left') {
+                        newFrame.style.animation = 'slideInFromRight 0.5s ease forwards';
+                    } else {
+                        newFrame.style.animation = 'slideInFromLeft 0.5s ease forwards';
+                    }
+
+                    setTimeout(() => {
+                        caption.textContent = photoData[photoIndex].caption;
+                        caption.style.opacity = '1';
+                        photoAnimating = false;
+                    }, 200);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    if (stage.contains(currentFrame)) {
+                        stage.removeChild(currentFrame);
+                    }
+
+                    viewer.style.transition = 'opacity 1s ease';
+                    viewer.style.opacity = '0';
+
+                    setTimeout(() => {
+                        viewer.style.display = 'none';
+                        end.classList.add('show');
+
+                        const endText = document.getElementById('photos-end-text');
+                        typeText(endText, TEXTS.photosEnd, 25, () => {
+                            const nextBtn = document.getElementById('photos-next-btn');
+                            nextBtn.style.opacity = '0';
+                            nextBtn.style.animation = 'fadeInUp 1s ease forwards';
+                        });
+
+                        photoAnimating = false;
+                    }, 1000);
+                }, 600);
+            }
+        }
+
+        document.getElementById('photos-next-btn').addEventListener('click', () => {
+            switchScreen('screen-photos', 'screen-quiz');
+            initQuiz();
+        });
+
+        // ===========================
+        // SCREEN 4 — QUIZ
+        // ===========================
+        const quizData = [
+            {
+                q: "What do you do best without even trying?",
+                opts: [
+                    { text: "Start arguments", reaction: "Starting arguments out of nowhere is a real skill." },
+                    { text: "Look pretty", reaction: "True. Looking this good is just normal for you." },
+                    { text: "Act innocent after doing something suspicious", reaction: "That face has fooled people before. Not me, though." },
+                    { text: "All of the above", reaction: "Correct. The full package." },
+                ]
+            },
+            {
+                q: "If you say \"I'm fine,\" what does that usually mean?",
+                opts: [
+                    { text: "You are actually fine", reaction: "Sounds good. But I know that's not true." },
+                    { text: "Someone is about to get blamed", reaction: "Exactly. Somehow it becomes someone else's fault." },
+                    { text: "A fight is loading", reaction: "Yes. The loading screen is already there." },
+                    { text: "Nobody is safe", reaction: "Most accurate answer on the page." },
+                ]
+            },
+            {
+                q: "What would you do after creating a problem?",
+                opts: [
+                    { text: "Fix it", reaction: "You clicked the responsible answer. Very suspicious." },
+                    { text: "Make a face first, then think of something", reaction: "Yes. This is the most you answer here." },
+                    { text: "Laugh first, think later", reaction: "Chaos first, logic later. Classic." },
+                    { text: "Blame someone else", reaction: "And suddenly, it's everyone else's problem." },
+                ]
+            },
+            {
+                q: "Which of these feels the most like you?",
+                opts: [
+                    { text: "Handmade bouquet", reaction: "Soft, pretty, and more special because it was yours." },
+                    { text: "Handmade rakhi", reaction: "Making it by hand was such a you thing to do." },
+                    { text: "Random chaos with full confidence", reaction: "The confidence really carries the chaos." },
+                    { text: "All of them", reaction: "Correct. Somehow, all of them are you." },
+                ]
+            },
+            {
+                q: "How do you manage to look good in every age and every photo?",
+                opts: [
+                    { text: "Black magic", reaction: "Not impossible." },
+                    { text: "Luck", reaction: "No. Luck is not that strong." },
+                    { text: "Illegal levels of photogenic", reaction: "That sounds legally accurate." },
+                    { text: "You just do", reaction: "Exactly. Some things don't need explaining." },
+                ]
+            },
+        ];
+
+        let quizIndex = 0;
+
+        function initQuiz() {
+            const header = document.getElementById('quiz-header');
+
+            setTimeout(() => {
+                header.style.transition = 'opacity 1s ease';
+                header.style.opacity = '0';
+                setTimeout(() => {
+                    header.style.display = 'none';
+                    showQuizQuestion(0);
+                }, 1000);
+            }, 2500);
+        }
+
+        function showQuizQuestion(index) {
+            const body = document.getElementById('quiz-body');
+            const bar = document.getElementById('quiz-bar');
+
+            bar.style.width = ((index + 1) / quizData.length * 100) + '%';
+
+            const old = body.querySelector('.quiz-card.active');
+            if (old) {
+                old.style.animation = 'none';
+                old.style.opacity = '0';
+                old.style.transition = 'opacity 0.4s ease';
+                setTimeout(() => old.remove(), 400);
+            }
+
+            const q = quizData[index];
+            const card = document.createElement('div');
+            card.classList.add('quiz-card');
+
+            const questionEl = document.createElement('p');
+            questionEl.classList.add('quiz-question');
+            questionEl.textContent = q.q;
+
+            const optsEl = document.createElement('div');
+            optsEl.classList.add('quiz-options');
+
+            q.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.classList.add('quiz-opt');
+                btn.textContent = opt.text;
+
+                btn.addEventListener('click', () => {
+                    optsEl.querySelectorAll('.quiz-opt').forEach(b => {
+                        b.classList.add('dimmed');
+                    });
+                    btn.classList.remove('dimmed');
+                    btn.classList.add('selected');
+
+                    const reaction = document.createElement('p');
+                    reaction.classList.add('quiz-reaction');
+                    reaction.textContent = opt.reaction;
+                    card.appendChild(reaction);
+                    setTimeout(() => reaction.classList.add('show'), 50);
+
+                    setTimeout(() => {
+                        quizIndex++;
+                        if (quizIndex < quizData.length) {
+                            showQuizQuestion(quizIndex);
+                        } else {
+                            showQuizEnding();
+                        }
+                    }, 1800);
+                });
+
+                optsEl.appendChild(btn);
+            });
+
+            card.appendChild(questionEl);
+            card.appendChild(optsEl);
+            body.appendChild(card);
+            setTimeout(() => card.classList.add('active'), 50);
+        }
+
+        function showQuizEnding() {
+            const container = document.getElementById('quiz-container');
+            container.style.transition = 'opacity 1s ease';
+            container.style.opacity = '0';
+
+            setTimeout(() => {
+                container.style.display = 'none';
+                const ending = document.getElementById('quiz-ending');
+                ending.classList.add('show');
+
+                const quizEndText = document.getElementById('quiz-end-text');
+                setTimeout(() => {
+                    typeText(quizEndText, TEXTS.quizEnd, 28, () => {
+                        setTimeout(() => {
+                            const btn = document.getElementById('quiz-next-btn');
+                            btn.style.animation = 'fadeInUp 1s ease forwards';
+                        }, 500);
+                    });
+                }, 800);
+            }, 1000);
+
+            document.getElementById('quiz-next-btn').addEventListener('click', () => {
+                switchScreen('screen-quiz', 'screen-audio');
+            });
+        }
+
+        // ===========================
+        // SCREEN 5 — AUDIO PLAYER
+        // ===========================
+        const audioTracks = [
+            { src: 'audio/audio1.mp4', title: 'The Laugh™', cover: 'images/cover1.jpg' },
+            { src: 'audio/audio2.mp4', title: 'Recharge Bhi Kara Do', cover: 'images/cover2.jpg' },
+            { src: 'audio/audio3.mp4', title: 'Maharani Moments', cover: 'images/cover3.jpg' },
+            { src: 'audio/audio4.mp4', title: 'Tera Vehm Hai', cover: 'images/cover4.jpg' },
+            { src: 'audio/audio5.mp4', title: 'Buuji 🥹', cover: 'images/cover5.png' },
+            { src: 'audio/audio6.mp3', title: 'Fake Birthday / Sisters Day', cover: 'images/cover6.png' },
+            { src: 'audio/audio7.mp4', title: 'The Punjabi Lesson', cover: 'images/cover7.png' },
+        ];
+
+        let audioIndex = 0;
+        let audioPlayer = null;
+        let audioInterval = null;
+
+        (function initAudio() {
+            const coverImg = document.getElementById('audio-cover');
+            const titleEl = document.getElementById('audio-title');
+            const trackNum = document.getElementById('audio-track-num');
+            const progressFill = document.getElementById('audio-progress-fill');
+            const progressBar = document.getElementById('audio-progress-bar');
+            const currentTimeEl = document.getElementById('audio-current');
+            const durationEl = document.getElementById('audio-duration');
+            const playBtn = document.getElementById('audio-play');
+            const playIcon = document.getElementById('audio-play-icon');
+            const prevBtn = document.getElementById('audio-prev');
+            const nextBtn = document.getElementById('audio-next');
+            const dotsContainer = document.getElementById('audio-dots');
+            const playerContainer = document.getElementById('audio-player-container');
+            const audioEnd = document.getElementById('audio-end');
+
+            const playPath = 'M8 5v14l11-7z';
+            const pausePath = 'M6 4h4v16H6V4zm8 0h4v16h-4V4z';
+
+            audioTracks.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.classList.add('audio-dot');
+                if (i === 0) dot.classList.add('active');
+                dotsContainer.appendChild(dot);
+            });
+
+            function formatTime(s) {
+                if (isNaN(s)) return '0:00';
+                const m = Math.floor(s / 60);
+                const sec = Math.floor(s % 60);
+                return `${m}:${sec.toString().padStart(2, '0')}`;
+            }
+
+            function loadTrack(index) {
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer.currentTime = 0;
+                    clearInterval(audioInterval);
+                }
+
+                const track = audioTracks[index];
+                coverImg.style.opacity = '0';
+                setTimeout(() => {
+                    coverImg.src = track.cover;
+                    coverImg.style.opacity = '1';
+                }, 300);
+
+                titleEl.textContent = track.title;
+                trackNum.textContent = `${String(index + 1).padStart(2, '0')} / ${String(audioTracks.length).padStart(2, '0')}`;
+
+                progressFill.style.width = '0%';
+                currentTimeEl.textContent = '0:00';
+                durationEl.textContent = '0:00';
+                playIcon.querySelector('path').setAttribute('d', playPath);
+
+                dotsContainer.querySelectorAll('.audio-dot').forEach((d, i) => {
+                    d.classList.toggle('active', i === index);
+                });
+
+                audioPlayer = new Audio(track.src);
+
+                audioPlayer.addEventListener('loadedmetadata', () => {
+                    durationEl.textContent = formatTime(audioPlayer.duration);
+                });
+
+                audioPlayer.addEventListener('ended', () => {
+                    playIcon.querySelector('path').setAttribute('d', playPath);
+                    clearInterval(audioInterval);
+
+                    if (index < audioTracks.length - 1) {
+                        setTimeout(() => {
+                            audioIndex++;
+                            loadTrack(audioIndex);
+                            playAudio();
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            playerContainer.style.transition = 'opacity 0.9s ease';
+                            playerContainer.style.opacity = '0';
+
+                            setTimeout(() => {
+                                playerContainer.style.display = 'none';
+                                audioEnd.classList.add('show');
+                            }, 900);
+                        }, 700);
+                    }
+                });
+            }
+
+            function playAudio() {
+                if (!audioPlayer) return;
+                audioPlayer.play().then(() => {
+                    playIcon.querySelector('path').setAttribute('d', pausePath);
+                    clearInterval(audioInterval);
+                    audioInterval = setInterval(() => {
+                        if (audioPlayer && audioPlayer.duration) {
+                            const pct = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                            progressFill.style.width = pct + '%';
+                            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+                        }
+                    }, 100);
+                }).catch(() => {});
+            }
+
+            function pauseAudio() {
+                if (!audioPlayer) return;
+                audioPlayer.pause();
+                playIcon.querySelector('path').setAttribute('d', playPath);
+                clearInterval(audioInterval);
+            }
+
+            playBtn.addEventListener('click', () => {
+                if (!audioPlayer) {
+                    loadTrack(0);
+                    playAudio();
+                    return;
+                }
+                if (audioPlayer.paused) {
+                    playAudio();
+                } else {
+                    pauseAudio();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (audioIndex < audioTracks.length - 1) {
+                    audioIndex++;
+                    loadTrack(audioIndex);
+                    playAudio();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (audioIndex > 0) {
+                    audioIndex--;
+                    loadTrack(audioIndex);
+                    playAudio();
+                }
+            });
+
+            progressBar.addEventListener('click', (e) => {
+                if (!audioPlayer || !audioPlayer.duration) return;
+                const rect = progressBar.getBoundingClientRect();
+                const pct = (e.clientX - rect.left) / rect.width;
+                audioPlayer.currentTime = pct * audioPlayer.duration;
+            });
+
+            document.getElementById('audio-final-btn').addEventListener('click', () => {
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    clearInterval(audioInterval);
+                }
+                switchScreen('screen-audio', 'screen-birthday');
+                initBirthday();
+            });
+
+            loadTrack(0);
+        })();
+
+        // ===========================
+        // SCREEN 6 — BIRTHDAY
+        // ===========================
+                function initBirthday() {
+            const main = document.getElementById('bday-main');
+            const bdayText = document.getElementById('bday-text');
+            const last = document.getElementById('bday-last');
+
+            setTimeout(() => {
+                main.style.animation = 'fadeIn 3s ease forwards';
+            }, 500);
+
+            setTimeout(() => {
+                const colors = ['#ff99cc', '#ffffff', '#ffd700', '#ffb3d9', '#fff0f5'];
+                const end = Date.now() + 4000;
+
+                (function frame() {
+                    confetti({
+                        particleCount: 3,
+                        angle: 60,
+                        spread: 80,
+                        origin: { x: 0, y: 0.5 },
+                        colors: colors,
+                        gravity: 0.6,
+                    });
+                    confetti({
+                        particleCount: 3,
+                        angle: 120,
+                        spread: 80,
+                        origin: { x: 1, y: 0.5 },
+                        colors: colors,
+                        gravity: 0.6,
+                    });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                })();
+
+                confetti({
+                    particleCount: 120,
+                    spread: 100,
+                    origin: { x: 0.5, y: 0.1 },
+                    colors: colors,
+                    gravity: 0.7,
+                    ticks: 300,
+                });
+            }, 3500);
+
+            setTimeout(() => {
+                bdayText.style.animation = 'fadeIn 1s ease forwards';
+                setTimeout(() => {
+                    typeText(bdayText, TEXTS.birthdayText, 30, () => {
+                        setTimeout(() => {
+                            last.style.animation = 'fadeInUp 2s ease forwards';
+
+                            setTimeout(() => {
+                                const restartBtn = document.getElementById('bday-restart-btn');
+                                restartBtn.style.animation = 'fadeInUp 1.5s ease forwards';
+
+                                restartBtn.addEventListener('click', () => {
+                                    location.reload();
+                                });
+                            }, 3000);
+                        }, 800);
+                    });
+                }, 500);
+            }, 5500);
+
+            setTimeout(() => {
+                setInterval(() => {
+                    confetti({
+                        particleCount: 2,
+                        angle: 90,
+                        spread: 160,
+                        origin: { x: Math.random(), y: -0.1 },
+                        colors: ['#ff99cc', '#ffffff', '#ffd700'],
+                        gravity: 0.4,
+                        ticks: 400,
+                    });
+                }, 400);
+            }, 8000);
+        }
+    </script>
+
+</body>
+</html>
