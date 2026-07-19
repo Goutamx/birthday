@@ -796,7 +796,7 @@
 
     <!-- SCREEN 1 — LANDING -->
     <div class="screen active" id="screen-landing">
-        <img src="images/landing.png" alt="" class="landing-photo">
+        <img src="landing.png" alt="" class="landing-photo">
         <div class="landing-content">
             <h1 class="landing-title" id="landing-title">Happy Birthday, Bhena.</h1>
             <p class="landing-sub" id="landing-sub">Just something fun in the middle of all this. Maybe it makes you smile.</p>
@@ -856,7 +856,7 @@
             </div>
             <div class="audio-card-player" id="audio-card-player">
                 <div class="audio-cover-wrapper">
-                    <img src="images/cover1.jpg" alt="" class="audio-cover-img" id="audio-cover">
+                    <img src="cover1.jpg" alt="" class="audio-cover-img" id="audio-cover">
                     <div class="audio-cover-overlay"></div>
                     <span class="audio-track-number" id="audio-track-num">01 / 07</span>
                 </div>
@@ -891,14 +891,14 @@
     </div>
 
     <!-- SCREEN 6 — BIRTHDAY -->
-<div class="screen" id="screen-birthday">
-    <div class="birthday-content">
-        <h1 class="bday-main" id="bday-main">Happy Birthday, Bhena.</h1>
-        <div class="bday-text" id="bday-text"></div>
-        <p class="bday-last" id="bday-last">Stay exactly this real.</p>
-        <button class="btn bday-restart-btn" id="bday-restart-btn">View Again ↻</button>
+    <div class="screen" id="screen-birthday">
+        <div class="birthday-content">
+            <h1 class="bday-main" id="bday-main">Happy Birthday, Bhena.</h1>
+            <div class="bday-text" id="bday-text"></div>
+            <p class="bday-last" id="bday-last">Stay exactly this real.</p>
+            <button class="btn bday-restart-btn" id="bday-restart-btn">View Again ↻</button>
+        </div>
     </div>
-</div>
 
     <script>
         // ===========================
@@ -1075,20 +1075,20 @@
         }
 
         // ===========================
-        // SCREEN 3 — PHOTOS
+        // SCREEN 3 — PHOTOS (same folder paths)
         // ===========================
         const photoData = [
-            { src: 'images/photo1.jpg', caption: "You look even prettier when you're making faces." },
-            { src: 'images/photo2.png', caption: "This is the face of someone about to fight the camera." },
-            { src: 'images/photo3.jpg', caption: "Little you. Still very much you." },
-            { src: 'images/photo4.jpg', caption: "You were a pari then. Still are, just louder." },
-            { src: 'images/photo5.jpg', caption: "The color is bright. So are you. Always have been." },
-            { src: 'images/photo6.jpg', caption: "A small thing that meant more than you knew." },
-            { src: 'images/photo7.png', caption: "Smaller than the ones in shops. More beautiful than all of them." },
-            { src: 'images/photo8.jpg', caption: "Only you could make a haircut story this dramatic." },
-            { src: 'images/photo9.jpg', caption: "The first one. Still the most special." },
-            { src: 'images/photo10.jpg', caption: "Homemade, handmade, and completely awesome. Best Rakhi ever." },
-            { src: 'images/photo11.jpg', caption: "Every year you tie this and every year it means more." },
+            { src: 'photo1.jpg', caption: "You look even prettier when you're making faces." },
+            { src: 'photo2.png', caption: "This is the face of someone about to fight the camera." },
+            { src: 'photo3.jpg', caption: "Little you. Still very much you." },
+            { src: 'photo4.jpg', caption: "You were a pari then. Still are, just louder." },
+            { src: 'photo5.jpg', caption: "The color is bright. So are you. Always have been." },
+            { src: 'photo6.jpg', caption: "A small thing that meant more than you knew." },
+            { src: 'photo7.png', caption: "Smaller than the ones in shops. More beautiful than all of them." },
+            { src: 'photo8.jpg', caption: "Only you could make a haircut story this dramatic." },
+            { src: 'photo9.jpg', caption: "The first one. Still the most special." },
+            { src: 'photo10.jpg', caption: "Homemade, handmade, and completely awesome. Best Rakhi ever." },
+            { src: 'photo11.jpg', caption: "Every year you tie this and every year it means more." },
         ];
 
         let photoIndex = 0;
@@ -1205,7 +1205,7 @@
         });
 
         // ===========================
-        // SCREEN 4 — QUIZ
+        // SCREEN 4 — QUIZ (double-tap fix)
         // ===========================
         const quizData = [
             {
@@ -1256,6 +1256,7 @@
         ];
 
         let quizIndex = 0;
+        let quizAnswered = false;
 
         function initQuiz() {
             const header = document.getElementById('quiz-header');
@@ -1273,6 +1274,8 @@
         function showQuizQuestion(index) {
             const body = document.getElementById('quiz-body');
             const bar = document.getElementById('quiz-bar');
+
+            quizAnswered = false;
 
             bar.style.width = ((index + 1) / quizData.length * 100) + '%';
 
@@ -1301,11 +1304,16 @@
                 btn.textContent = opt.text;
 
                 btn.addEventListener('click', () => {
+                    if (quizAnswered) return;
+                    quizAnswered = true;
+
                     optsEl.querySelectorAll('.quiz-opt').forEach(b => {
                         b.classList.add('dimmed');
+                        b.disabled = true;
                     });
                     btn.classList.remove('dimmed');
                     btn.classList.add('selected');
+                    btn.disabled = true;
 
                     const reaction = document.createElement('p');
                     reaction.classList.add('quiz-reaction');
@@ -1359,16 +1367,16 @@
         }
 
         // ===========================
-        // SCREEN 5 — AUDIO PLAYER
+        // SCREEN 5 — AUDIO PLAYER (same folder paths)
         // ===========================
         const audioTracks = [
-            { src: 'audio/audio1.mp4', title: 'The Laugh™', cover: 'images/cover1.jpg' },
-            { src: 'audio/audio2.mp4', title: 'Recharge Bhi Kara Do', cover: 'images/cover2.jpg' },
-            { src: 'audio/audio3.mp4', title: 'Maharani Moments', cover: 'images/cover3.jpg' },
-            { src: 'audio/audio4.mp4', title: 'Tera Vehm Hai', cover: 'images/cover4.jpg' },
-            { src: 'audio/audio5.mp4', title: 'Buuji 🥹', cover: 'images/cover5.png' },
-            { src: 'audio/audio6.mp3', title: 'Fake Birthday / Sisters Day', cover: 'images/cover6.png' },
-            { src: 'audio/audio7.mp4', title: 'The Punjabi Lesson', cover: 'images/cover7.png' },
+            { src: 'audio1.mp4', title: 'The Laugh™', cover: 'cover1.jpg' },
+            { src: 'audio2.mp4', title: 'Recharge Bhi Kara Do', cover: 'cover2.jpg' },
+            { src: 'audio3.mp4', title: 'Maharani Moments', cover: 'cover3.jpg' },
+            { src: 'audio4.mp4', title: 'Tera Vehm Hai', cover: 'cover4.jpg' },
+            { src: 'audio5.mp4', title: 'Buuji 🥹', cover: 'cover5.png' },
+            { src: 'audio6.mp3', title: 'Fake Birthday / Sisters Day', cover: 'cover6.png' },
+            { src: 'audio7.mp4', title: 'The Punjabi Lesson', cover: 'cover7.png' },
         ];
 
         let audioIndex = 0;
@@ -1537,7 +1545,7 @@
         // ===========================
         // SCREEN 6 — BIRTHDAY
         // ===========================
-                function initBirthday() {
+        function initBirthday() {
             const main = document.getElementById('bday-main');
             const bdayText = document.getElementById('bday-text');
             const last = document.getElementById('bday-last');
